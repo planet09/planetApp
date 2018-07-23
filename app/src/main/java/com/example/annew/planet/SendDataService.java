@@ -9,12 +9,15 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 public class SendDataService extends Service {
     DataTask dataTask;
-    public static String msg;
+    public static String msg,money,name;
+
 
     public SendDataService() {
 
@@ -35,6 +38,9 @@ public class SendDataService extends Service {
         }else{
 
             msg = intent.getStringExtra("msg");
+            money= intent.getStringExtra("money");
+            name= intent.getStringExtra("name");
+
             Log.d("-----------", msg);
             sendData();
 
@@ -44,7 +50,7 @@ public class SendDataService extends Service {
 
 
     public void sendData(){
-        dataTask = new DataTask("http://172.30.1.44:3000/sendData/");
+        dataTask = new DataTask("http://70.12.245.108:3000/sendData/");
         dataTask.execute(msg);
 
     }
@@ -66,9 +72,16 @@ public class SendDataService extends Service {
 
         @Override
         protected String doInBackground(String... strings) {
+            String query1="";
+            String query2="";
             String msg= strings[0];
-
-            url += msg;
+            try {
+                query1 = URLEncoder.encode(money, "utf-8");
+                query2 = URLEncoder.encode(name, "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            url += query1+"/"+query2;
             Log.d("-----------",url);
 
             StringBuilder sb = new StringBuilder();
@@ -77,6 +90,7 @@ public class SendDataService extends Service {
             BufferedReader reader=null;
             try {
                 url = new URL(this.url);
+
 
                 con = (HttpURLConnection) url.openConnection();
                 if (con != null) {
